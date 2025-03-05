@@ -7,7 +7,7 @@ Build and deploy a LLM application using Retrieval Augmented Generation
 (RAG) to improve response performance in a specific domain
 
 ## Deliverables
-- 10 minute video describing your project
+- 10 minute video describing your project 
     - Objective, Data, Pipeline, Model, Performance evaluation, Do NOT show code!
 - GitHub repo
 ## Project Introduction
@@ -28,8 +28,8 @@ write pipelines to:
 - Step 1. Run clone the GitHub repo and create venv.
 - Step 2. Install necessary libraries `pip install -r requirements.txt`
 - Step 3. Add a .env file with OpenAI api key `OPENAI_API_KEY=<your API key>`
-- Step 4. Run app.py for local hosting
-
+- Step 4. Run `streamlit run app.py` for local hosting
+Ask
 For preparing data, run `python preparation.py`
 
 ## Reference:

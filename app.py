@@ -4,7 +4,7 @@ from dotenv import load_dotenv
 from openai import OpenAI
 from pinecone import Pinecone
 from datetime import datetime
-
+from utils.similarity import find_top_k_similar_vectors
 # Load environment variables
 load_dotenv()
 
@@ -64,18 +64,43 @@ def submit_query():
     user_query = st.session_state.input_box.strip()
     if user_query:
         st.session_state.input_box = ""
-        # Use the bottom spinner placeholder
-        with st.session_state.spinner_placeholder.spinner("Generating..."):
+        # use the bottom spinner placeholder
+        with st.spinner("Generating..."):
             st.session_state.messages.append({"role": "user", "content": user_query})
             current_date = datetime.now().strftime("%A, %B %d, %Y")
+            
+            # determine the proper top_k value
+            prompt = f"""
+                        You are an expert in financial data retrieval and analysis. I have a vector database where each entry represents the financial performance of a company in a specific year. When a user asks a question, I need to query this database to retrieve the most relevant entries. The number of entries retrieved is determined by a parameter called `top_k`.
+                        The user's input may vary in specificity, and I need your help to decide the best value for `top_k` based on their query. A higher `top_k` is better for broad or exploratory questions, while a lower `top_k` is better for specific or precise questions. respond **only with a single number** that directly answers the question.
+                        Here is the user's query: 
+                        '{user_query}' """
+            top_k_response = client.chat.completions.create(
+                model="gpt-4o",
+                messages=[{"role": "system", "content": prompt}],
+                max_tokens=10,
+                temperature=0.9,
+            )
+            top_k = int(top_k_response.choices[0].message.content)
+            print("top_k:", top_k)
+            
+            # query embedding
             response = client.embeddings.create(
                 model="text-embedding-ada-002",
                 input=user_query,
                 encoding_format="float"
             )
             embedding = response.data[0].embedding
-            res = index.query(vector=embedding, top_k=5, include_metadata=True)
-            context = "\n".join([str(match["metadata"]) for match in res["matches"]])
+
+            # Pinecone metadata retrieval - Pinecone written version
+            # res = index.query(vector=embedding, top_k=top_k, include_metadata=True)
+            # context = "\n".join([str(match["metadata"]) for match in res["matches"]])
+
+            # Pinecone metadata retrieval - Self written version
+            res = find_top_k_similar_vectors(index, query_vector=embedding, top_k=top_k)
+            context = "\n".join(str(match) for match in res)
+            
+            # build prompt and generate output
             prompt = f"""
             You are an AI assistant that answers questions based on provided context. The overall answer style should be financial, and you will not answer anything unrelated.
             Today's date is {current_date}.
@@ -83,6 +108,7 @@ def submit_query():
             Current Question: {user_query}
             Answer (in markdown format):
             """
+
             chat_response = client.chat.completions.create(
                 model="gpt-4o",
                 messages=[
@@ -95,7 +121,7 @@ def submit_query():
             assistant_reply_safe = assistant_reply.replace("$", "\\$")
             st.session_state.messages.append({"role": "assistant", "content": assistant_reply_safe})
 
-# Scrollable chat history container
+# scrollable chat history container
 st.subheader("Chat History")
 with st.container():
     st.markdown('<div class="chat-history" id="chat-history">', unsafe_allow_html=True)
@@ -105,7 +131,7 @@ with st.container():
             st.markdown(message["content"])
     st.markdown('</div>', unsafe_allow_html=True)
 
-# Input area for user queries with callback for submission
+# input area for user queries with callback for submission
 st.subheader("Ask a question about financial performances")
 st.text_input(
     "Enter your question:",
