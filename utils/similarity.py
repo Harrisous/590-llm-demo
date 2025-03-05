@@ -1,12 +1,11 @@
 import numpy as np
-from dotenv import load_dotenv
+import streamlit as st
 from openai import OpenAI
 from pinecone import Pinecone
-import os
 
-load_dotenv()
-pc = Pinecone(api_key=os.getenv("PINECONE_API_KEY"))
-client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+# Load secrets from Streamlit
+pc = Pinecone(api_key=st.secrets["PINECONE_API_KEY"])
+client = OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
 index_name = "financials"
 index = pc.Index(index_name)
 

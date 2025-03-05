@@ -8,9 +8,9 @@ from openai import OpenAI
 from pinecone import Pinecone, ServerlessSpec
 
 # load api to update pinecone data and load api for openai embedding
+# for local data update
 load_dotenv()
-PINECONE_API_KEY = os.getenv("PINECONE_API_KEY")
-pc = Pinecone(api_key=PINECONE_API_KEY)
+pc = Pinecone(api_key=os.getenv("PINECONE_API_KEY"))
 client = OpenAI(api_key = os.getenv("OPENAI_API_KEY"))
 
 index_name = "financials"

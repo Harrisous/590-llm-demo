@@ -1,20 +1,19 @@
-import os
 import streamlit as st
-from dotenv import load_dotenv
 from openai import OpenAI
 from pinecone import Pinecone
 from datetime import datetime
 from utils.similarity import find_top_k_similar_vectors
 # Load environment variables
-load_dotenv()
+# # for local deployment
+# load_dotenv()
+# PINECONE_API_KEY = os.getenv("PINECONE_API_KEY")
+# OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 
-PINECONE_API_KEY = os.getenv("PINECONE_API_KEY")
-pc = Pinecone(api_key=PINECONE_API_KEY)
+pc = Pinecone(api_key=st.secrets["PINECONE_API_KEY"])
+client = OpenAI(api_key=st.secrets["OPENAI_API_KEY"])
+
 index_name = "financials"
 index = pc.Index(index_name)
-
-OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
-client = OpenAI(api_key=OPENAI_API_KEY)
 
 # Streamlit app configuration
 st.set_page_config(page_title="Ask Financials", page_icon="🤖", layout="wide")

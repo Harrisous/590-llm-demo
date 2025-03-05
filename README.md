@@ -28,10 +28,8 @@ write pipelines to:
 - Step 1. Run clone the GitHub repo and create venv.
 - Step 2. Install necessary libraries `pip install -r requirements.txt`
 - Step 3. Add a .env file with OpenAI api key `OPENAI_API_KEY=<your API key>`
-- Step 4. Run `streamlit run app.py` for local hosting
-Ask
+- Step 4. Search "# for local deployment" and change the secrete loading method; Run `streamlit run app.py` for local hosting.
 For preparing data, run `python preparation.py`
-
 ## Reference:
 Embedding: https://platform.openai.com/docs/api-reference/embeddings
 LLM output: https://platform.openai.com/docs/api-reference/chat
